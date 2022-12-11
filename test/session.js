@@ -1593,6 +1593,20 @@ describe('session()', function(){
           .expect(200, 'false', done)
         });
       })
+
+      it('should respect changes to "session" callback param', function(done){
+        var server = createServer(null, function (req, res) {
+          req.session.regenerate(function (err, session) {
+            if (err) res.statusCode = 500
+            session.customValue = true
+            res.end(String(req.session.customValue))
+          })
+        })
+
+        request(server)
+        .get('/')
+        .expect(200, 'true', done)
+      })
     })
 
     describe('.reload()', function () {
@@ -1706,6 +1720,21 @@ describe('session()', function(){
               .set('Cookie', cookie(res))
               .expect(200, 'ok', done)
           })
+      })
+
+      it('should respect changes to "session" callback param', function (done) {
+        var store = new session.MemoryStore()
+        var server = createServer({ store: store }, function (req, res) {
+          req.session.reload(function (err, session) {
+            if (err) res.statusCode = 500
+            session.customValue = true
+            res.end(String(req.session.customValue))
+          })
+        })
+
+        request(server)
+        .get('/')
+        .expect(200, 'true', done)
       })
     })
 
